@@ -34,7 +34,9 @@ const INITIAL_SETTINGS: CafeSettings = {
   taxRate: 11,
   discountEnabled: false,
   discountType: 'percent',
-  discountRate: 0
+  discountRate: 0,
+  printerType: 'browser',
+  printerWidth: 32
 };
 
 export const StorageService = {
@@ -89,7 +91,9 @@ export const StorageService = {
       ...INITIAL_SETTINGS, 
       ...parsed,
       // Ensure legacy settings have defaults
-      discountType: parsed.discountType || 'percent'
+      discountType: parsed.discountType || 'percent',
+      printerType: parsed.printerType || 'browser',
+      printerWidth: parsed.printerWidth || 32
     };
   },
 

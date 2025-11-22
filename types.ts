@@ -63,6 +63,9 @@ export interface CafeSettings {
   discountEnabled: boolean;
   discountType: 'percent' | 'nominal';
   discountRate: number; // Stores value. If type is nominal, this is the amount in Rp.
+  // Printer Configuration
+  printerType: 'browser' | 'bluetooth';
+  printerWidth: 32 | 48; // Characters per line (32 for 58mm, 48 for 80mm)
 }
 
 export type ViewState = 'pos' | 'inventory' | 'reports' | 'history' | 'settings';

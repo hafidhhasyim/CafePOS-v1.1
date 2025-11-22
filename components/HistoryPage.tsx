@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Printer, Edit, Trash2, X, Calendar, Filter, AlertCircle, Check, Minus, Plus } from 'lucide-react';
 import { Order, Product, OrderItem, CafeSettings } from '../types';
+import { PrinterService } from '../services/printerService';
 
 interface HistoryPageProps {
   orders: Order[];
@@ -32,6 +33,11 @@ const HistoryPage: React.FC<HistoryPageProps> = ({ orders, products, settings, o
 
   // Print Receipt Function
   const handlePrint = (order: Order) => {
+    if (settings.printerType === 'bluetooth') {
+        PrinterService.printOrder(order, settings);
+        return;
+    }
+
     const receiptWindow = window.open('', '', 'width=300,height=600');
     if (!receiptWindow) return;
 

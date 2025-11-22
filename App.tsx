@@ -30,7 +30,9 @@ const App: React.FC = () => {
     taxRate: 0,
     discountEnabled: false,
     discountType: 'percent',
-    discountRate: 0
+    discountRate: 0,
+    printerType: 'browser',
+    printerWidth: 32
   });
 
   // Initial Load
