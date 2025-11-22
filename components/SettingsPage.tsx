@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Save, RefreshCw, Download, Upload, Store, Database, Check, AlertTriangle, Receipt, Image as ImageIcon, Percent, X, Info, AlertCircle } from 'lucide-react';
+import { Save, RefreshCw, Download, Upload, Store, Database, Check, AlertTriangle, Receipt, Image as ImageIcon, Percent, X, Info, AlertCircle, Lock, Key } from 'lucide-react';
 import { CafeSettings, Product } from '../types';
 import { StorageService } from '../services/storageService';
 
@@ -16,11 +16,18 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ settings, products, onUpdat
   const [formData, setFormData] = useState<CafeSettings>(settings);
   const [isSaved, setIsSaved] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false); // State for custom modal
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  
+  // Password State
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordMsg, setPasswordMsg] = useState({ type: '', text: '' });
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
-  // Count resettable products
+  // Count resettable products (Only those that are NOT unlimited and HAVE autoResetStock true)
   const resettableCount = products.filter(p => p.autoResetStock && !p.isUnlimited).length;
 
   useEffect(() => {
@@ -53,6 +60,30 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ settings, products, onUpdat
     });
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 3000);
+  };
+
+  const handlePasswordChange = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      setPasswordMsg({ type: 'error', text: 'Semua kolom harus diisi.' });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordMsg({ type: 'error', text: 'Password baru dan konfirmasi tidak cocok.' });
+      return;
+    }
+
+    if (StorageService.checkPassword(oldPassword)) {
+      StorageService.setPassword(newPassword);
+      setPasswordMsg({ type: 'success', text: 'Password berhasil diubah!' });
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setPasswordMsg({ type: '', text: '' }), 3000);
+    } else {
+      setPasswordMsg({ type: 'error', text: 'Password lama salah.' });
+    }
   };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,7 +149,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ settings, products, onUpdat
 
   return (
     <div className="p-8 h-full overflow-y-auto bg-slate-50">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto pb-20">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-900">Pengaturan</h1>
           <p className="text-slate-500 mt-1">Kelola identitas kafe, tampilan struk, pajak, dan data.</p>
@@ -354,6 +385,60 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ settings, products, onUpdat
           </div>
         </form>
 
+        {/* Password Management */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8 mt-8">
+          <div className="p-6 border-b border-slate-100 flex items-center gap-3">
+            <div className="bg-slate-100 p-2 rounded-lg">
+              <Lock className="w-6 h-6 text-slate-600" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-800">Keamanan Akun</h2>
+          </div>
+          <div className="p-6">
+            <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
+               <div>
+                 <label className="block text-sm font-semibold text-slate-700 mb-2">Password Lama</label>
+                 <input 
+                   type="password" 
+                   value={oldPassword}
+                   onChange={e => setOldPassword(e.target.value)}
+                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                 />
+               </div>
+               <div>
+                 <label className="block text-sm font-semibold text-slate-700 mb-2">Password Baru</label>
+                 <input 
+                   type="password" 
+                   value={newPassword}
+                   onChange={e => setNewPassword(e.target.value)}
+                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                 />
+               </div>
+               <div>
+                 <label className="block text-sm font-semibold text-slate-700 mb-2">Konfirmasi Password Baru</label>
+                 <input 
+                   type="password" 
+                   value={confirmPassword}
+                   onChange={e => setConfirmPassword(e.target.value)}
+                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                 />
+               </div>
+               <div className="flex items-center gap-3 pt-2">
+                  <button 
+                    type="submit"
+                    className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold transition-all flex items-center gap-2"
+                  >
+                    <Key className="w-4 h-4" /> Ubah Password
+                  </button>
+                  {passwordMsg.text && (
+                    <span className={`text-sm font-medium ${passwordMsg.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>
+                      {passwordMsg.text}
+                    </span>
+                  )}
+               </div>
+            </form>
+          </div>
+        </div>
+
         {/* Stock Management (No Form wrapper) */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8 mt-8">
           <div className="p-6 border-b border-slate-100 flex items-center gap-3">
@@ -370,7 +455,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ settings, products, onUpdat
                 <div className="mt-2 text-sm text-slate-600 font-medium flex items-center gap-2">
                    <Info className="w-4 h-4 text-blue-500" />
                    {resettableCount > 0 
-                     ? <span className="text-blue-600">{resettableCount} produk siap direset.</span> 
+                     ? <span className="text-blue-600">{resettableCount} produk terkonfigurasi untuk reset harian.</span> 
                      : <span className="text-slate-400">Belum ada produk yang diatur untuk reset harian.</span>
                    }
                 </div>

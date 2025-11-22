@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, ShoppingCart, Archive, History as HistoryIcon, Settings } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Archive, History as HistoryIcon, Settings, LogOut } from 'lucide-react';
 import { Product, Category, Order, ViewState, CartItem, CafeSettings } from './types';
 import { StorageService } from './services/storageService';
 import PosPage from './components/PosPage';
@@ -8,8 +8,12 @@ import InventoryPage from './components/InventoryPage';
 import ReportsPage from './components/ReportsPage';
 import HistoryPage from './components/HistoryPage';
 import SettingsPage from './components/SettingsPage';
+import LoginPage from './components/LoginPage';
 
 const App: React.FC = () => {
+  // Auth State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
   const [currentView, setCurrentView] = useState<ViewState>('pos');
   
   // Global State
@@ -238,6 +242,15 @@ const App: React.FC = () => {
     setSettings(StorageService.getSettings());
   };
 
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentView('pos'); // Reset View
+  };
+
   // Navigation Items
   const navItems = [
     { id: 'pos', label: 'Kasir', icon: ShoppingCart },
@@ -246,6 +259,10 @@ const App: React.FC = () => {
     { id: 'reports', label: 'Laporan', icon: LayoutDashboard },
     { id: 'settings', label: 'Pengaturan', icon: Settings },
   ];
+
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
 
   return (
     <div className="flex h-screen bg-slate-50 text-slate-800 overflow-hidden font-sans">
@@ -280,15 +297,22 @@ const App: React.FC = () => {
         </nav>
         
         <div className="p-4 border-t border-slate-100">
-          <div className="hidden lg:flex items-center gap-3 px-2 py-2">
+          <div className="flex items-center gap-3 px-2 py-2 mb-2">
             <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
               AD
             </div>
-            <div className="flex flex-col">
+            <div className="hidden lg:flex flex-col">
               <span className="text-sm font-semibold text-slate-700">Admin Kafe</span>
               <span className="text-xs text-slate-400">Online</span>
             </div>
           </div>
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center lg:justify-start gap-3 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="hidden lg:block text-sm font-medium">Logout</span>
+          </button>
         </div>
       </aside>
 

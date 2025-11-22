@@ -6,6 +6,7 @@ const KEYS = {
   CATEGORIES: 'kafekita_categories',
   ORDERS: 'kafekita_orders',
   SETTINGS: 'kafekita_settings',
+  PASSWORD: 'kafekita_auth_password', // New Key for Auth
 };
 
 // Initial Data Seed
@@ -96,6 +97,18 @@ export const StorageService = {
     localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
   },
 
+  // --- AUTHENTICATION ---
+  checkPassword: (inputPassword: string): boolean => {
+    const stored = localStorage.getItem(KEYS.PASSWORD);
+    // Default password if not set is 'admin'
+    const actual = stored || 'admin'; 
+    return inputPassword === actual;
+  },
+
+  setPassword: (newPassword: string) => {
+    localStorage.setItem(KEYS.PASSWORD, newPassword);
+  },
+  
   // Manual Stock Reset
   resetStockManually: (): Product[] => {
     const currentProducts = StorageService.getProducts();
