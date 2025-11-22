@@ -1,0 +1,5 @@
+{
+  "name": "KafeKita POS",
+  "description": "Aplikasi kasir kafe modern dengan manajemen produk, inventaris, dan laporan penjualan export Excel.",
+  "requestFramePermissions": []
+}
